@@ -6,17 +6,20 @@
 // This file contains user level macro.
 // User can only use the symbols in this file.
 
-#ifndef CPP_FREE_MOCK_H
-#define CPP_FREE_MOCK_H
+#ifndef CPP_FREE_MOCK_CPP_FREE_MOCK_H_
+#define CPP_FREE_MOCK_CPP_FREE_MOCK_H_
 
-#include "cpp_free_mock_impl.h"
+#include "internal_macro.h"
 
 // mocker is the variable name in user code.
 #define CREATE_MOCKER(mocker, function) \
-    CreateMockerWithInternal(mocker, function, __LINE__, createMockerWithIdentity)
+    CREATE_MOCKER_INTERNAL(mocker, function, __COUNTER__, CreateMocker)
 
 // Used to create a member function mocker that can check this pointer.
 #define CREATE_MOCKER_T(mocker, function) \
-    CreateMockerWithInternal(mocker, function, __LINE__, createMockerWithIdentityWithThisPointerCheck)
+    CREATE_MOCKER_INTERNAL(mocker, function, __COUNTER__, CreateMockerWithThisPointerCheck)
 
-#endif // CPP_FREE_MOCK_H
+// Used in EXPECT_CALL(*mocker, MOCK_FUNCTION(_))
+#define MOCK_FUNCTION MockFunction
+
+#endif // CPP_FREE_MOCK_CPP_FREE_MOCK_H_

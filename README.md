@@ -7,14 +7,14 @@ Based on gmock, can mock global function, member function, class static function
 
 Hello world:
 
-```
+```cpp
 string func() {
     return "Non mocked.";
 }
 
 TEST(HelloWorld, First) {
-    CreateMocker(mocker, func);
-    EXPECT_CALL(*mocker, MockFunction()).Times(Exactly(1))
+    CREATE_MOCKER(mocker, func);
+    EXPECT_CALL(*mocker, MOCK_FUNCTION()).Times(Exactly(1))
         .WillOnce(Return("Hello world."));
     EXPECT_EQ("Hello world.", func());
 }
