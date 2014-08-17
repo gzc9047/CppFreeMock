@@ -19,3 +19,5 @@ TEST(HelloWorld, First) {
     EXPECT_EQ("Hello world.", func());
 }
 ```
+
+[Here](https://github.com/gzc9047/cpp_non_virtual_mock) is the prototype when I try to solve this problem.
