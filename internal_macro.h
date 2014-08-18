@@ -13,7 +13,7 @@
 // The struct identity to make sure every mock have different type, we use decltype(mocker)::pMocker internal.
 #define CREATE_MOCKER_UNIQ(mocker, function, uniq, creator) \
     struct uniq {}; \
-    auto mocker = ::CppFreeMock::MockerCreator<uniq>::creator(function)
+    auto mocker = ::CppFreeMock::MockerCreator<uniq>::creator(function, #function)
 
 #define CREATE_MOCKER_INTERNAL2(mocker, function, identity, creator) \
     CREATE_MOCKER_UNIQ(mocker, function, TypeForUniqMocker##identity, creator)

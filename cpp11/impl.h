@@ -18,10 +18,18 @@
 
 namespace CppFreeMock {
 
+// How it works:
+//  1, I create a entry point for runtime patch, to move the cpu run here;
+//  2, In the entry point, it call a mocked method to do the mock function.
+//      a) Because the entry point is a static function, so the mocked method should be static or invoke from a static variable. 
+//      b) Because we can mock member function, so the mocked method must be a member function, so we can only use a static varibale to call it.
+//  3, So I create MockerStore, with a static variable.
+//  4, Hack gmock, create Mocker as MOCK_METHOD does.
+
 // I use function type to combine one type and a few other type into one type.
 // We can also use another type like Combiner to do this.
 // In this file:
-//  1, type I means the uniq type for every mocker.
+//  1, type I means the uniq id type for every mocker.
 //  2, type C means class type of the mockee function, if it's a member function of static function.
 //  3, type R means the mockee function's return type.
 //  4, variable type ... P means the function's parameter types.
@@ -85,9 +93,11 @@ struct GmockMatcherMapper {
 // This class is hack how gmock implement it.
 template < typename R, typename ... P >
 struct MockerBase<R(P ...)> {
+    MockerBase(const std::string& _functionName): functionName(_functionName) {}
+
     // Use 'MockFunction' as the function name for EXPECT_CALL.
     R MockFunction(P... p) {
-        gmocker.SetOwnerAndName(this, __func__);
+        gmocker.SetOwnerAndName(this, functionName.c_str());
         return gmocker.Invoke(p ...);
     }
 
@@ -101,6 +111,7 @@ struct MockerBase<R(P ...)> {
 
     mutable ::testing::FunctionMocker<R(P...)> gmocker;
     std::vector<char> binaryBackup; // Backup the mockee's binary code changed in RuntimePatcher.
+    const std::string functionName;
 };
 
 #define MOCKER(constness) \
@@ -109,7 +120,9 @@ struct Mocker<I(R(C::*)(P ...) constness)> : MockerBase<R(P ...)> { \
     typedef I IntegrateType(R(C::*)(P ...) constness); \
     typedef R (C::*FunctionType)(P ...) constness; \
     typedef R StubFunctionType(P ...); \
-    Mocker(FunctionType function): originFunction(function) { \
+    Mocker(FunctionType function, const std::string& functionName): \
+        MockerBase<StubFunctionType>(functionName), \
+        originFunction(function) { \
         RuntimePatcher::SetFunctionJump(originFunction, \
                 &MockerEntryPoint<IntegrateType>::EntryPoint, \
                 MockerBase<StubFunctionType>::binaryBackup); \
@@ -134,7 +147,9 @@ template < typename I, typename R, typename ... P>
 struct Mocker<I(R(P ...))> : MockerBase<R(P ...)> {
     typedef I IntegrateType(R(P ...));
     typedef R FunctionType(P ...);
-    Mocker(FunctionType function): originFunction(function) {
+    Mocker(FunctionType function, const std::string& functionName):
+        MockerBase<FunctionType>(functionName),
+        originFunction(function) {
         RuntimePatcher::SetFunctionJump(originFunction,
                 MockerEntryPoint<IntegrateType>::EntryPoint,
                 MockerBase<FunctionType>::binaryBackup);
@@ -186,9 +201,9 @@ struct MockerCreator {
 #define CREATE_MOCKER_WITH_MEMDER_FUNCTION(constness) \
     template < typename C, typename R, typename ... P > \
     static std::unique_ptr<Mocker<I(R(C::*)(P ...) constness)>> \
-            CreateMocker(R (C::*function)(P ...) constness) { \
+            CreateMocker(R (C::*function)(P ...) constness, const std::string& functionName) { \
         typedef I IntegrateType(R(C::*)(P ...) constness); \
-        return std::unique_ptr<Mocker<IntegrateType>>(new Mocker<IntegrateType>(function)); \
+        return std::unique_ptr<Mocker<IntegrateType>>(new Mocker<IntegrateType>(function, functionName)); \
     }
 
     CREATE_MOCKER_WITH_MEMDER_FUNCTION(const)
@@ -199,10 +214,11 @@ struct MockerCreator {
     //  1, ::testing::FunctionMocker don't have copy construction.
     template < typename R, typename ... P >
     static std::unique_ptr<Mocker<I(R(P ...))>>
-            CreateMocker(R function(P ...)) {
-        return std::unique_ptr<Mocker<I(R(P ...))>>(new Mocker<I(R(P ...))>(function));
+            CreateMocker(R function(P ...), const std::string& functionName) {
+        return std::unique_ptr<Mocker<I(R(P ...))>>(new Mocker<I(R(P ...))>(function, functionName));
     }
 
+    // TODO(guzuchao): use WithThisPointerCheck instead normal member function mock.
 #define CREATE_MOCKER_WITH_THIR_POINTER_CHECK(constness) \
     template < typename C, typename R, typename ... P > \
     static std::unique_ptr<MockerWithThisPointerCheck<I(R(C::*)(void*, P ...) constness)>> \
