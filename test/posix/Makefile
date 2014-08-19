@@ -17,7 +17,7 @@ all: $(TARGETS)
 recent: $(RECENT)
 # Test
 test: all
-#	echo $(TARGETS_PATH) | tr " " "\n" | while read test; do echo "Test: $$test"; $$test; done
+	echo $(TARGETS_PATH) | tr " " "\n" | while read test; do echo "Test: $$test"; $$test; done
 # Recent test
 recent-test: recent
 	$(RECENT_PATH)

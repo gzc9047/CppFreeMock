@@ -1,6 +1,7 @@
 TMPDIR=/Volumes/RaidRamDisk/
-GMOCK_LIB=../libgmock.a ../libgmock_main.a ../libgtest.a
-GMOCK_INCLUDE=-I$(GMOCK_PATH)/include -I$(GMOCK_PATH)/gtest/include -I../
+PROJECT_ROOT=..
+GMOCK_LIB=$(PROJECT_ROOT)/libgmock.a $(PROJECT_ROOT)/libgmock_main.a $(PROJECT_ROOT)/libgtest.a
+GMOCK_INCLUDE=-I$(GMOCK_PATH)/include -I$(GMOCK_PATH)/gtest/include -I$(PROJECT_ROOT)
 CPP11_FLAGS=-g -O0 -std=c++11 -fno-inline -falign-functions=32
 SRC=$(wildcard *.cpp)
 TARGETS=$(patsubst %.cpp, %, $(SRC))

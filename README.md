@@ -3,7 +3,7 @@ CppFreeMock
 
 Based on gmock, can mock global function, member function, class static function without change source code.
 
-[Here](https://onedrive.live.com/redir?resid=4C6FDC828365B80E!28191&authkey=!AK5mz05lh29D2eQ&ithint=onenote%2c)(writing) is the document and design notes host on OneNote.
+[Here](https://onedrive.live.com/redir?resid=4C6FDC828365B80E!28191&authkey=!AK5mz05lh29D2eQ&ithint=onenote%2c) is the document and design notes host on OneNote.
 
 Hello world:
 
