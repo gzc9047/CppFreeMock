@@ -8,7 +8,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "posix/runtime_patch_impl.h"
+#include "runtime_patch.h"
 
 // Use CppFreeMock to mock some global function to test itself.
 #include "cpp_free_mock.h"

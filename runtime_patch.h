@@ -8,6 +8,24 @@
 #ifndef CPP_FREE_MOCK_RUNTIME_PATCH_H_
 #define CPP_FREE_MOCK_RUNTIME_PATCH_H_
 
+#include <vector>
+
+namespace CppFreeMock {
+
+namespace RuntimePatcherImpl {
+    // Need impl in architecture relevant file.
+    static int UnprotectMemory(const void* const address, const size_t length);
+    static int UnprotectMemoryForOnePage(void* const address);
+    static int SetJump(void* const address, const void* const destination, std::vector<char>& binary_backup);
+    static void RevertJump(void* address, const std::vector<char>& binary_backup);
+}
+
+} // namespace CppFreeMock
+
+#if defined(__x86_64__) || defined(__i386__)
+#include "x86/runtime_patch_impl.h"
+#endif
+
 #ifdef __APPLE__
 #include "posix/runtime_patch_impl.h"
 #elif __linux__
