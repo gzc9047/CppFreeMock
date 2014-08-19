@@ -16,15 +16,8 @@
 namespace CppFreeMock {
 
 namespace RuntimePatcherImpl {
-    // To be simple, I don't create .cpp for this static value, so you can't include this file in 2 or more cpp file.
-    static std::size_t PageSize = getpagesize();
-
     static std::size_t AlignAddress(const std::size_t address, const std::size_t page_size) {
         return address & (~(page_size - 1));
-    }
-
-    static int UnprotectMemoryForOnePage(void* const address) {
-        return UnprotectMemory(address, PageSize);
     }
 
     static void BackupBinary(const char* const function, std::vector<char>& binary_backup, const std::size_t size) {
