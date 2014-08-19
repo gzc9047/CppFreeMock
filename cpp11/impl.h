@@ -123,7 +123,7 @@ struct Mocker<I(R(C::*)(P ...) constness)> : MockerBase<R(P ...)> { \
     Mocker(FunctionType function, const std::string& functionName): \
         MockerBase<StubFunctionType>(functionName), \
         originFunction(function) { \
-        RuntimePatcher::SetFunctionJump(originFunction, \
+        RuntimePatcher::GraftFunction(originFunction, \
                 &MockerEntryPoint<IntegrateType>::EntryPoint, \
                 MockerBase<StubFunctionType>::binaryBackup); \
         MockerStore<IntegrateType>::pMocker = this; \
@@ -133,7 +133,7 @@ struct Mocker<I(R(C::*)(P ...) constness)> : MockerBase<R(P ...)> { \
         MockerStore<IntegrateType>::pMocker = nullptr; \
     } \
     void RestoreToReal() { \
-        RuntimePatcher::RestoreJump(originFunction, MockerBase<StubFunctionType>::binaryBackup); \
+        RuntimePatcher::RevertGraft(originFunction, MockerBase<StubFunctionType>::binaryBackup); \
     } \
     FunctionType originFunction; \
 }
@@ -150,7 +150,7 @@ struct Mocker<I(R(P ...))> : MockerBase<R(P ...)> {
     Mocker(FunctionType function, const std::string& functionName):
         MockerBase<FunctionType>(functionName),
         originFunction(function) {
-        RuntimePatcher::SetFunctionJump(originFunction,
+        RuntimePatcher::GraftFunction(originFunction,
                 MockerEntryPoint<IntegrateType>::EntryPoint,
                 MockerBase<FunctionType>::binaryBackup);
         MockerStore<IntegrateType>::pMocker = this;
@@ -162,7 +162,7 @@ struct Mocker<I(R(P ...))> : MockerBase<R(P ...)> {
     }
 
     void RestoreToReal() {
-        RuntimePatcher::RestoreJump(originFunction, MockerBase<FunctionType>::binaryBackup);
+        RuntimePatcher::RevertGraft(originFunction, MockerBase<FunctionType>::binaryBackup);
     }
 
     FunctionType* originFunction;
@@ -176,7 +176,7 @@ struct MockerWithThisPointerCheck<I(R(C::*)(void*, P ...) constness)> : MockerBa
     typedef R (C::*FunctionType)(P ...) constness; \
     typedef R StubFunctionType(void*, P ...); \
     MockerWithThisPointerCheck(FunctionType function): originFunction(function) { \
-        RuntimePatcher::SetFunctionJump(originFunction, \
+        RuntimePatcher::GraftFunction(originFunction, \
                 &MockEntryPointWithThisPointer<EntryPointType>::EntryPoint, \
                 MockerBase<StubFunctionType>::binaryBackup); \
         MockerStoreWithThisPointer<IntegrateType>::pMocker = this; \
@@ -186,7 +186,7 @@ struct MockerWithThisPointerCheck<I(R(C::*)(void*, P ...) constness)> : MockerBa
         MockerStoreWithThisPointer<IntegrateType>::pMocker = nullptr; \
     } \
     void RestoreToReal() { \
-        RuntimePatcher::RestoreJump(originFunction, MockerBase<StubFunctionType>::binaryBackup); \
+        RuntimePatcher::RevertGraft(originFunction, MockerBase<StubFunctionType>::binaryBackup); \
     } \
     FunctionType originFunction; \
 }

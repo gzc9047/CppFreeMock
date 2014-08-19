@@ -5,8 +5,8 @@
 //
 // Implement runtime patch by using mprotect.
 
-#ifndef CPP_FREE_MOCK_POSIX_RUNTIME_PATCH_H_
-#define CPP_FREE_MOCK_POSIX_RUNTIME_PATCH_H_
+#ifndef CPP_FREE_MOCK_POSIX_RUNTIME_PATCH_IMPL_H_
+#define CPP_FREE_MOCK_POSIX_RUNTIME_PATCH_IMPL_H_
 
 #include <cerrno>
 #include <cstddef>
@@ -102,4 +102,4 @@ std::size_t RuntimePatcherImpl::PageSize = getpagesize();
 
 } // namespace CppFreeMock
 
-#endif // CPP_FREE_MOCK_POSIX_RUNTIME_PATCH_H_
+#endif // CPP_FREE_MOCK_POSIX_RUNTIME_PATCH_IMPL_H_

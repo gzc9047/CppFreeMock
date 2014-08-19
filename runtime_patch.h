@@ -16,9 +16,10 @@
 
 namespace CppFreeMock {
 
+// Provide 2 interface, GraftFunction and RevertGraft.
 struct RuntimePatcher {
     template < typename F1, typename F2 >
-    static int SetFunctionJump(F1 address, F2 destination, std::vector<char>& binary_backup) {
+    static int GraftFunction(F1 address, F2 destination, std::vector<char>& binary_backup) {
         void* function = reinterpret_cast<void*>((std::size_t&)address);
         if (0 != RuntimePatcherImpl::UnprotectMemoryForOnePage(function)) {
             int err = errno;
@@ -29,7 +30,7 @@ struct RuntimePatcher {
     }
 
     template < typename F >
-    static void RestoreJump(F address, const std::vector<char>& binary_backup) {
+    static void RevertGraft(F address, const std::vector<char>& binary_backup) {
         RuntimePatcherImpl::RevertPatch(reinterpret_cast<void*>((std::size_t&)address), binary_backup);
     }
 };
