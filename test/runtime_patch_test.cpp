@@ -53,10 +53,18 @@ TEST(RuntimePatcher, UnprotectMemoryForOnePage) {
 }
 
 TEST(RuntimePatcher, IsDistanceOverflow) {
+    // Non overflow.
     for (long long i = INT32_MIN; i <= INT32_MAX; i += 0x10000000) {
         EXPECT_FALSE(RuntimePatcher::IsDistanceOverflow(i));
     }
     EXPECT_FALSE(RuntimePatcher::IsDistanceOverflow(INT32_MAX));
+    // Overflow/
+    long long distance = INT32_MIN;
+    --distance;
+    EXPECT_TRUE(RuntimePatcher::IsDistanceOverflow(distance));
+    distance = INT32_MAX;
+    ++distance;
+    EXPECT_TRUE(RuntimePatcher::IsDistanceOverflow(distance));
     EXPECT_TRUE(RuntimePatcher::IsDistanceOverflow(INT64_MIN));
     EXPECT_TRUE(RuntimePatcher::IsDistanceOverflow(INT64_MAX));
 }
@@ -81,10 +89,10 @@ TEST(RuntimePatcher, SetJump) {
     void* function = reinterpret_cast<void*>(data);
     void* destination = reinterpret_cast<void*>(data2);
     CREATE_MOCKER(patchFunction64bitAddressMocker, RuntimePatcher::PatchFunction64bitAddress);
-    CREATE_MOCKER(patchFunctionMocker, RuntimePatcher::PatchFunction);
+    CREATE_MOCKER(patchFunction32bitDistanceMocker, RuntimePatcher::PatchFunction32bitDistance);
     EXPECT_CALL(*patchFunction64bitAddressMocker, MOCK_FUNCTION(_, _))
         .Times(Exactly(0));
-    EXPECT_CALL(*patchFunctionMocker, MOCK_FUNCTION(reinterpret_cast<char*>(function), _))
+    EXPECT_CALL(*patchFunction32bitDistanceMocker, MOCK_FUNCTION(reinterpret_cast<char*>(function), _))
         .Times(Exactly(1));
     vector<char> binary_backup;
     EXPECT_EQ(0, RuntimePatcher::SetJump(function, destination, binary_backup));

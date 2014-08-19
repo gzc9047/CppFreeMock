@@ -51,7 +51,8 @@ struct RuntimePatcher {
         return distance;
     }
 
-    static void PatchFunction(char* const function, const std::size_t distance) {
+    // PatchFunction32bitDistance and PatchFunction64bitAddress only support x86 platform.
+    static void PatchFunction32bitDistance(char* const function, const std::size_t distance) {
         const char* const distance_bytes = reinterpret_cast<const char*>(&distance);
         // instruction: jmp 0x********;
         function[0] = 0xE9; // jmp
@@ -60,13 +61,13 @@ struct RuntimePatcher {
 
     static void PatchFunction64bitAddress(char* const function, const void* const destination) {
         const char* const distance_bytes = reinterpret_cast<const char*>(&destination);
-        // instruction:
+        // instructions:
         // push (low 32bit)
         // mov [rsp + 4] (high 32bit)
         // ret
         function[0] = 0x68; // push
         std::copy(distance_bytes, distance_bytes + 4, function + 1);
-        // C7442404 is prefix of mov dword [rsp+4], *
+        // C7442404 is prefix of: mov dword [rsp+4], *
         function[5] = 0xC7;
         function[6] = 0x44;
         function[7] = 0x24;
@@ -82,8 +83,11 @@ struct RuntimePatcher {
             BackupBinary(function, binary_backup, 14); // long jmp.
             PatchFunction64bitAddress(function, destination);
         } else {
+            // long jmp can cover all the case to patch function, but it need change more binary then this.
+            // So I choose to keep this implement.
+            // And we should only backup what we change, no more byte.
             BackupBinary(function, binary_backup, 5); // short jmp.
-            PatchFunction(function, distance);
+            PatchFunction32bitDistance(function, distance);
         }
         return 0;
     }
@@ -97,7 +101,7 @@ struct RuntimePatcher {
         void* function = reinterpret_cast<void*>((std::size_t&)address);
         if (0 != UnprotectMemoryForOnePage(function)) {
             int err = errno;
-            std::cerr << "Unprotect memory meet errno: " << err << std::endl;
+            std::cerr << "Unprotect memory meet errno: " << err << " description: " << strerror(err) << std::endl;
             std::abort();
         }
         return SetJump(function, reinterpret_cast<void*>((std::size_t&)destination), binary_backup);
