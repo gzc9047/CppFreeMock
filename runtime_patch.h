@@ -14,7 +14,9 @@ namespace CppFreeMock {
 
 namespace RuntimePatcherImpl {
     // Need impl in architecture relevant file.
+    // OS
     static int UnprotectMemoryForOnePage(void* const address);
+    // CPU
     static int SetJump(void* const address, const void* const destination, std::vector<char>& binary_backup);
     static void RevertJump(void* address, const std::vector<char>& binary_backup);
 }
