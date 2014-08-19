@@ -12,14 +12,14 @@
 #include "internal_macro.h"
 
 // mocker is the variable name in user code.
+// Used to create:
+//  1, global function;
+//  2, static member function;
+//  3, member function mocker that can check this pointer.
 #define CREATE_MOCKER(mocker, function) \
     CREATE_MOCKER_INTERNAL(mocker, function, __COUNTER__, CreateMocker)
 
-// Used to create a member function mocker that can check this pointer.
-#define CREATE_MOCKER_T(mocker, function) \
-    CREATE_MOCKER_INTERNAL(mocker, function, __COUNTER__, CreateMockerWithThisPointerCheck)
-
 // Used in EXPECT_CALL(*mocker, MOCK_FUNCTION(_))
-#define MOCK_FUNCTION MockFunction
+#define MOCK_FUNCTION CppFreeMockStubFunction
 
 #endif // CPP_FREE_MOCK_CPP_FREE_MOCK_H_

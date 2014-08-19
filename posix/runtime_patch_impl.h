@@ -92,7 +92,7 @@ struct RuntimePatcherImpl {
         return 0;
     }
 
-    static void RevertPatch(void* address, const std::vector<char>& binary_backup) {
+    static void RevertJump(void* address, const std::vector<char>& binary_backup) {
         std::copy(binary_backup.begin(), binary_backup.end(), reinterpret_cast<char*>(address));
     }
 };

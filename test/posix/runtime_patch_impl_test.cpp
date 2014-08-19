@@ -14,6 +14,7 @@
 #include "cpp_free_mock.h"
 
 #include <iostream>
+#include <vector>
 
 using namespace ::std;
 using namespace ::testing;

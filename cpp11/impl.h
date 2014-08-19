@@ -48,23 +48,10 @@ struct MockerStoreWithThisPointer<I(F)> {
 template < typename I, typename F > Mocker<I(F)>* MockerStore<I(F)>::pMocker = nullptr;
 template < typename I, typename F > MockerWithThisPointerCheck<I(F)>* MockerStoreWithThisPointer<I(F)>::pMocker = nullptr;
 
-#define MOCKER_ENTRY_POINT(constness) \
-template < typename I, typename C, typename R, typename ... P > \
-struct MockerEntryPoint<I(R(C::*)(P ...) constness)> { \
-    R EntryPoint(P... p) { \
-        return MockerStore<I(R(C::*)(P ...) constness)>::pMocker->MockFunction(p ...); \
-    } \
-}
-
-MOCKER_ENTRY_POINT(const);
-MOCKER_ENTRY_POINT();
-
-#undef MOCKER_ENTRY_POINT
-
 template < typename I, typename R, typename ... P >
 struct MockerEntryPoint<I(R(P ...))> {
     static R EntryPoint(P... p) {
-        return MockerStore<I(R(P ...))>::pMocker->MockFunction(p ...);
+        return MockerStore<I(R(P ...))>::pMocker->CppFreeMockStubFunction(p ...);
     }
 };
 
@@ -72,8 +59,7 @@ struct MockerEntryPoint<I(R(P ...))> {
 template < typename I, typename C, typename R, typename ... P > \
 struct MockEntryPointWithThisPointer<I(R(C::*)(P ...) constness)> { \
     R EntryPoint(P... p) { \
-        std::cout << "M ThisPoint: " << this << std::endl; \
-        return MockerStoreWithThisPointer<I(R(C::*)(void*, P ...) constness)>::pMocker->MockFunction(this, p ...); \
+        return MockerStoreWithThisPointer<I(R(C::*)(void*, P ...) constness)>::pMocker->CppFreeMockStubFunction(this, p ...); \
     } \
 }
 
@@ -82,7 +68,7 @@ MOCKER_ENTRY_POINT_WITH_THIS_POINTER();
 
 #undef MOCKER_ENTRY_POINT_WITH_THIS_POINTER
 
-// This used to map MockerBase::MockFunction's parameter to gmock's parameter, till now no need to use it.
+// This used to map MockerBase::CppFreeMockStubFunction's parameter to gmock's parameter, till now no need to use it.
 // If we use it, wo need a parameters mapper to map Type A,B,... => Type Matcher<A>,Matcher<B>,... as the parameter.
 // Example: https://github.com/gzc9047/cpp_non_virtual_mock/blob/master/test_type_mapper.cpp
 template < typename T >
@@ -95,8 +81,8 @@ template < typename R, typename ... P >
 struct MockerBase<R(P ...)> {
     MockerBase(const std::string& _functionName): functionName(_functionName) {}
 
-    // Use 'MockFunction' as the function name for EXPECT_CALL.
-    R MockFunction(P... p) {
+    // Use 'CppFreeMockStubFunction' as the function name for EXPECT_CALL.
+    R CppFreeMockStubFunction(P... p) {
         gmocker.SetOwnerAndName(this, functionName.c_str());
         return gmocker.Invoke(p ...);
     }
@@ -104,7 +90,7 @@ struct MockerBase<R(P ...)> {
     // Here M means the Matcher type, not the real parameters.
     // For example ::testing::_ can match any value but is not a real parameter type.
     template < typename ... M >
-    ::testing::MockSpec<R(P...)>& gmock_MockFunction(M... m) {
+    ::testing::MockSpec<R(P...)>& gmock_CppFreeMockStubFunction(M... m) {
         gmocker.RegisterOwner(this);
         return gmocker.With(m ...);
     }
@@ -113,35 +99,6 @@ struct MockerBase<R(P ...)> {
     std::vector<char> binaryBackup; // Backup the mockee's binary code changed in RuntimePatcher.
     const std::string functionName;
 };
-
-#define MOCKER(constness) \
-template < typename I, typename C, typename R, typename ... P> \
-struct Mocker<I(R(C::*)(P ...) constness)> : MockerBase<R(P ...)> { \
-    typedef I IntegrateType(R(C::*)(P ...) constness); \
-    typedef R (C::*FunctionType)(P ...) constness; \
-    typedef R StubFunctionType(P ...); \
-    Mocker(FunctionType function, const std::string& functionName): \
-        MockerBase<StubFunctionType>(functionName), \
-        originFunction(function) { \
-        RuntimePatcher::GraftFunction(originFunction, \
-                &MockerEntryPoint<IntegrateType>::EntryPoint, \
-                MockerBase<StubFunctionType>::binaryBackup); \
-        MockerStore<IntegrateType>::pMocker = this; \
-    } \
-    ~Mocker() { \
-        RestoreToReal(); \
-        MockerStore<IntegrateType>::pMocker = nullptr; \
-    } \
-    void RestoreToReal() { \
-        RuntimePatcher::RevertGraft(originFunction, MockerBase<StubFunctionType>::binaryBackup); \
-    } \
-    FunctionType originFunction; \
-}
-
-MOCKER(const);
-MOCKER();
-
-#undef MOCKER
 
 template < typename I, typename R, typename ... P>
 struct Mocker<I(R(P ...))> : MockerBase<R(P ...)> {
@@ -175,7 +132,9 @@ struct MockerWithThisPointerCheck<I(R(C::*)(void*, P ...) constness)> : MockerBa
     typedef I EntryPointType(R(C::*)(P ...) constness); \
     typedef R (C::*FunctionType)(P ...) constness; \
     typedef R StubFunctionType(void*, P ...); \
-    MockerWithThisPointerCheck(FunctionType function): originFunction(function) { \
+    MockerWithThisPointerCheck(FunctionType function, const std::string& functionName): \
+        MockerBase<StubFunctionType>(functionName), \
+        originFunction(function) { \
         RuntimePatcher::GraftFunction(originFunction, \
                 &MockEntryPointWithThisPointer<EntryPointType>::EntryPoint, \
                 MockerBase<StubFunctionType>::binaryBackup); \
@@ -198,17 +157,17 @@ MOCKER_WITH_THIS_POINTER_CHECK();
 
 template < typename I >
 struct MockerCreator {
-#define CREATE_MOCKER_WITH_MEMDER_FUNCTION(constness) \
+#define CREATE_MOCKER_WITH_THIR_POINTER_CHECK(constness) \
     template < typename C, typename R, typename ... P > \
-    static std::unique_ptr<Mocker<I(R(C::*)(P ...) constness)>> \
+    static std::unique_ptr<MockerWithThisPointerCheck<I(R(C::*)(void*, P ...) constness)>> \
             CreateMocker(R (C::*function)(P ...) constness, const std::string& functionName) { \
-        typedef I IntegrateType(R(C::*)(P ...) constness); \
-        return std::unique_ptr<Mocker<IntegrateType>>(new Mocker<IntegrateType>(function, functionName)); \
+        typedef I IntegrateType(R(C::*)(void*, P ...) constness); \
+        return std::unique_ptr<MockerWithThisPointerCheck<IntegrateType>>(new MockerWithThisPointerCheck<IntegrateType>(function, functionName)); \
     }
 
-    CREATE_MOCKER_WITH_MEMDER_FUNCTION(const)
-    CREATE_MOCKER_WITH_MEMDER_FUNCTION()
-#undef CREATE_MOCKER_WITH_MEMDER_FUNCTION
+    CREATE_MOCKER_WITH_THIR_POINTER_CHECK(const)
+    CREATE_MOCKER_WITH_THIR_POINTER_CHECK()
+#undef CREATE_MOCKER_WITH_THIR_POINTER_CHECK
 
     // Use unique_ptr not the object itself because:
     //  1, ::testing::FunctionMocker don't have copy construction.
@@ -217,19 +176,6 @@ struct MockerCreator {
             CreateMocker(R function(P ...), const std::string& functionName) {
         return std::unique_ptr<Mocker<I(R(P ...))>>(new Mocker<I(R(P ...))>(function, functionName));
     }
-
-    // TODO(guzuchao): use WithThisPointerCheck instead normal member function mock.
-#define CREATE_MOCKER_WITH_THIR_POINTER_CHECK(constness) \
-    template < typename C, typename R, typename ... P > \
-    static std::unique_ptr<MockerWithThisPointerCheck<I(R(C::*)(void*, P ...) constness)>> \
-            CreateMockerWithThisPointerCheck(R (C::*function)(P ...) constness) { \
-        typedef I IntegrateType(R(C::*)(void*, P ...) constness); \
-        return std::unique_ptr<MockerWithThisPointerCheck<IntegrateType>>(new MockerWithThisPointerCheck<IntegrateType>(function)); \
-    }
-
-    CREATE_MOCKER_WITH_THIR_POINTER_CHECK(const)
-    CREATE_MOCKER_WITH_THIR_POINTER_CHECK()
-#undef CREATE_MOCKER_WITH_THIR_POINTER_CHECK
 };
 
 } // namespace CppFreeMock

@@ -31,7 +31,7 @@ struct RuntimePatcher {
 
     template < typename F >
     static void RevertGraft(F address, const std::vector<char>& binary_backup) {
-        RuntimePatcherImpl::RevertPatch(reinterpret_cast<void*>((std::size_t&)address), binary_backup);
+        RuntimePatcherImpl::RevertJump(reinterpret_cast<void*>((std::size_t&)address), binary_backup);
     }
 };
 
