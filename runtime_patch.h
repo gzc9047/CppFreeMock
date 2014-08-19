@@ -9,9 +9,31 @@
 #define CPP_FREE_MOCK_RUNTIME_PATCH_H_
 
 #ifdef __APPLE__
-#include "posix/runtime_patch.h"
+#include "posix/runtime_patch_impl.h"
 #elif __linux__
-#include "posix/runtime_patch.h"
+#include "posix/runtime_patch_impl.h"
 #endif
+
+namespace CppFreeMock {
+
+struct RuntimePatcher {
+    template < typename F1, typename F2 >
+    static int SetFunctionJump(F1 address, F2 destination, std::vector<char>& binary_backup) {
+        void* function = reinterpret_cast<void*>((std::size_t&)address);
+        if (0 != RuntimePatcherImpl::UnprotectMemoryForOnePage(function)) {
+            int err = errno;
+            std::cerr << "Unprotect memory meet errno: " << err << " description: " << strerror(err) << std::endl;
+            std::abort();
+        }
+        return RuntimePatcherImpl::SetJump(function, reinterpret_cast<void*>((std::size_t&)destination), binary_backup);
+    }
+
+    template < typename F >
+    static void RestoreJump(F address, const std::vector<char>& binary_backup) {
+        RuntimePatcherImpl::RevertPatch(reinterpret_cast<void*>((std::size_t&)address), binary_backup);
+    }
+};
+
+} // namespace CppFreeMock
 
 #endif // CPP_FREE_MOCK_RUNTIME_PATCH_H_

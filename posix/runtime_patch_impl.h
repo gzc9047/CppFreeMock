@@ -19,7 +19,7 @@
 
 namespace CppFreeMock {
 
-struct RuntimePatcher {
+struct RuntimePatcherImpl {
     static std::size_t PageSize;
 
     static std::size_t AlignAddress(const std::size_t address, const std::size_t page_size) {
@@ -95,26 +95,10 @@ struct RuntimePatcher {
     static void RevertPatch(void* address, const std::vector<char>& binary_backup) {
         std::copy(binary_backup.begin(), binary_backup.end(), reinterpret_cast<char*>(address));
     }
-
-    template < typename F1, typename F2 >
-    static int SetFunctionJump(F1 address, F2 destination, std::vector<char>& binary_backup) {
-        void* function = reinterpret_cast<void*>((std::size_t&)address);
-        if (0 != UnprotectMemoryForOnePage(function)) {
-            int err = errno;
-            std::cerr << "Unprotect memory meet errno: " << err << " description: " << strerror(err) << std::endl;
-            std::abort();
-        }
-        return SetJump(function, reinterpret_cast<void*>((std::size_t&)destination), binary_backup);
-    }
-
-    template < typename F >
-    static void RestoreJump(F address, const std::vector<char>& binary_backup) {
-        RevertPatch(reinterpret_cast<void*>((std::size_t&)address), binary_backup);
-    }
 };
 
 // To be simple, I don't create .cpp for this static value, so you can't include this file in 2 or more cpp file.
-std::size_t RuntimePatcher::PageSize = getpagesize();
+std::size_t RuntimePatcherImpl::PageSize = getpagesize();
 
 } // namespace CppFreeMock
 
