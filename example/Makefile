@@ -6,7 +6,7 @@ CPP11_FLAGS=-g -O0 -std=c++11 -fno-inline -falign-functions=32
 SRC=$(wildcard *.cpp)
 TARGETS=$(patsubst %.cpp, %, $(SRC))
 TARGETS_PATH=$(patsubst %.cpp, $(TMPDIR)/%.out, $(SRC))
-RECENT=test_member_function
+RECENT=test_other_library_function
 RECENT_PATH=$(patsubst %, $(TMPDIR)/%.out, $(RECENT))
 # Example
 %: %.cpp
