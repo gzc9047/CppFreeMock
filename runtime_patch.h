@@ -44,8 +44,9 @@ struct RuntimePatcher {
             int err = errno;
             std::cerr << "Unprotect memory meet errno: " << err << " description: " << strerror(err) << std::endl;
             std::abort();
+        } else {
+            return RuntimePatcherImpl::SetJump(function, reinterpret_cast<void*>((std::size_t&)destination), binary_backup);
         }
-        return RuntimePatcherImpl::SetJump(function, reinterpret_cast<void*>((std::size_t&)destination), binary_backup);
     }
 
     template < typename F >
