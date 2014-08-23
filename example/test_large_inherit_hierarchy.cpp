@@ -40,7 +40,6 @@ struct ClassC : ClassB {
     int c;
 };
 
-
 struct ClassD {
     int func0() {
         return 3 + d;
