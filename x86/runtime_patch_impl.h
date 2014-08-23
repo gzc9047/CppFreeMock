@@ -8,7 +8,6 @@
 #ifndef CPP_FREE_MOCK_X86_RUNTIME_PATCH_IMPL_H_
 #define CPP_FREE_MOCK_X86_RUNTIME_PATCH_IMPL_H_
 
-#include <cerrno>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
