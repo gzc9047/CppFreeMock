@@ -41,6 +41,14 @@ struct TestAnonymousMocker : public ::testing::Test {
     }
 };
 
+TEST_F(TestAnonymousMocker, TestSimpleSingleton) {
+    int a = 0;
+    ::CppFreeMock::SimpleSingleton<int*>::getInstance() = &a;
+    EXPECT_EQ(&a, ::CppFreeMock::SimpleSingleton<int*>::getInstance());
+    *::CppFreeMock::SimpleSingleton<int*>::getInstance() = 2;
+    EXPECT_EQ(2, a);
+}
+
 TEST_F(TestAnonymousMocker, AnonymousMocker) {
     EXPECT_CALL(*MOCKER(func0Parameter), MOCK_FUNCTION())
         .Times(Exactly(1))
