@@ -67,7 +67,9 @@ struct TestGlobalFunction : public ::testing::Test {
         stringValue(""),
         stringConstValue("HELLO") { }
     virtual void SetUp() { }
-    virtual void TearDown() { }
+    virtual void TearDown() {
+        CLEAR_MOCKER();
+    }
 
     bool boolValue;
     char charValue;
@@ -77,7 +79,7 @@ struct TestGlobalFunction : public ::testing::Test {
 };
 
 TEST_F(TestGlobalFunction, RestoreToReal) {
-    CREATE_MOCKER(mocker, func0Parameter);
+    auto mocker = MOCKER(func0Parameter);
     EXPECT_CALL(*mocker, MOCK_FUNCTION())
         .Times(Exactly(1))
         .WillOnce(Return("Hello world."));
@@ -88,7 +90,7 @@ TEST_F(TestGlobalFunction, RestoreToReal) {
 
 TEST_F(TestGlobalFunction, MultiParameter) {
     auto call = bind(func5Parameter, false, '0', 0, "LOUIX", "");
-    CREATE_MOCKER(mocker, func5Parameter);
+    auto mocker = MOCKER(func5Parameter);
     EXPECT_CALL(*mocker, MOCK_FUNCTION(_, _, _, _, _))
         .Times(Exactly(1))
         .WillOnce(Return("Hello world."));
@@ -108,7 +110,7 @@ TEST_F(TestGlobalFunction, MultiReferenceParameter) {
             ref(intValue),
             ref(stringValue),
             ref(stringConstValue));
-    CREATE_MOCKER(mocker, func5ReferenceParameter);
+    auto mocker = MOCKER(func5ReferenceParameter);
     EXPECT_CALL(*mocker, MOCK_FUNCTION(_, _, _, _, _))
         .Times(Exactly(1))
         .WillOnce(Return(1));
@@ -131,7 +133,7 @@ TEST_F(TestGlobalFunction, MultiReferenceParameterWithArgsAction) {
             ref(intValue),
             ref(stringValue),
             ref(stringConstValue));
-    CREATE_MOCKER(mocker, func5ReferenceParameter);
+    auto mocker = MOCKER(func5ReferenceParameter);
     EXPECT_CALL(*mocker, MOCK_FUNCTION(Ref(boolValue), Ref(charValue), Ref(intValue), Ref(stringValue), _))
         .Times(AtLeast(1))
         .WillOnce(WithArgs<0, 1>(Invoke(testReferenceStubP1P2)));
@@ -149,19 +151,19 @@ TEST_F(TestGlobalFunction, MultiReferenceParameterWithArgsAction) {
 
 TEST_F(TestGlobalFunction, FunctionPointer) {
     auto function = func0Parameter;
-    CREATE_MOCKER(mocker1, func0Parameter);
+    auto mocker1 = MOCKER(func0Parameter);
     EXPECT_CALL(*mocker1, MOCK_FUNCTION())
         .Times(Exactly(1))
         .WillOnce(Return("Func1"));
     EXPECT_EQ("Func1", func0Parameter());
     function = func0Parameter2;
-    CREATE_MOCKER(mocker2, function);
+    auto mocker2 = MOCKER(function);
     EXPECT_CALL(*mocker2, MOCK_FUNCTION())
         .Times(Exactly(1))
         .WillOnce(Return("Func2"));
     EXPECT_EQ("Func2", func0Parameter2());
     function = func0Parameter3;
-    CREATE_MOCKER(mocker3, function);
+    auto mocker3 = MOCKER(function);
     EXPECT_CALL(*mocker3, MOCK_FUNCTION())
         .Times(Exactly(1))
         .WillOnce(Return("Func3"));
@@ -169,8 +171,8 @@ TEST_F(TestGlobalFunction, FunctionPointer) {
 }
 
 TEST_F(TestGlobalFunction, TestNamespace) {
-    CREATE_MOCKER(mocker1, func0Parameter);
-    CREATE_MOCKER(mocker2, TestNamespace::func0Parameter);
+    auto mocker1 = MOCKER(func0Parameter);
+    auto mocker2 = MOCKER(TestNamespace::func0Parameter);
     EXPECT_CALL(*mocker1, MOCK_FUNCTION())
         .Times(Exactly(1))
         .WillOnce(Return("Func1"));

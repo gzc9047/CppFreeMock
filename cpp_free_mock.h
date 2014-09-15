@@ -16,8 +16,10 @@
 //  1, global function;
 //  2, static member function;
 //  3, member function mocker that can check this pointer.
-#define CREATE_MOCKER(mocker, function) \
-    CREATE_MOCKER_INTERNAL(mocker, function, __COUNTER__, CreateMocker)
+#define MOCKER(function) \
+    MOCKER_INTERNAL(function, __COUNTER__)
+
+#define CLEAR_MOCKER ::CppFreeMock::MockerCreator::RestoreAllMockerFunctionToReal
 
 // Used in EXPECT_CALL(*mocker, MOCK_FUNCTION(_))
 #define MOCK_FUNCTION CppFreeMockStubFunction

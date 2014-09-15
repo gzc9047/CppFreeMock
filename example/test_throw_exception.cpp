@@ -31,7 +31,7 @@ void func1() {
 }
 
 TEST(TestThrowException, ThrowBasicType) {
-    CREATE_MOCKER(mocker, func0);
+    auto mocker = MOCKER(func0);
     EXPECT_CALL(*mocker, MOCK_FUNCTION())
         .Times(Exactly(2))
         .WillOnce(Throw(0))
@@ -46,7 +46,7 @@ TEST(TestThrowException, ThrowBasicType) {
 }
 
 TEST(TestThrowException, ThrowFromNoExceptionFunction) {
-    CREATE_MOCKER(mocker, func0NoException);
+    auto mocker = MOCKER(func0NoException);
     EXPECT_CALL(*mocker, MOCK_FUNCTION())
         .Times(Exactly(1))
         .WillOnce(Throw(0));

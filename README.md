@@ -13,8 +13,7 @@ string func() {
 }
 
 TEST(HelloWorld, First) {
-    CREATE_MOCKER(mocker, func);
-    EXPECT_CALL(*mocker, MOCK_FUNCTION()).Times(Exactly(1))
+    EXPECT_CALL(*MOCKER(func), MOCK_FUNCTION()).Times(Exactly(1))
         .WillOnce(Return("Hello world."));
     EXPECT_EQ("Hello world.", func());
 }

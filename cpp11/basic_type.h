@@ -10,6 +10,10 @@
 
 namespace CppFreeMock {
 
+template < int uniq >
+struct TypeForUniqMocker {
+};
+
 template < typename T >
 struct MockerBase {
 };

@@ -21,7 +21,7 @@ using namespace ::testing;
 
 TEST(TestOtherLibraryFunction, strerror) {
     char fakeReturn[] = "Hello world.";
-    CREATE_MOCKER(mocker, strerror);
+    auto mocker = MOCKER(strerror);
     EXPECT_CALL(*mocker, MOCK_FUNCTION(0))
         .Times(Exactly(1))
         .WillOnce(Return(fakeReturn));
@@ -31,7 +31,7 @@ TEST(TestOtherLibraryFunction, strerror) {
 }
 
 TEST(TestOtherLibraryFunction, atoi) {
-    CREATE_MOCKER(mocker, atoi);
+    auto mocker = MOCKER(atoi);
     EXPECT_CALL(*mocker, MOCK_FUNCTION(_))
         .Times(Exactly(1))
         .WillOnce(Return(0));

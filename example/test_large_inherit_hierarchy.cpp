@@ -54,10 +54,16 @@ struct ClassE : ClassC, ClassD {
     int e;
 };
 
-TEST(TestLargeInheritHierarchy, ClassABC) {
-    CREATE_MOCKER(mockerA, &ClassA::func0);
-    CREATE_MOCKER(mockerB, &ClassB::func0);
-    CREATE_MOCKER(mockerC, &ClassC::func0);
+struct TestLargeInheritHierarchy : public ::testing::Test {
+    virtual void TearDown() {
+        CLEAR_MOCKER();
+    }
+};
+
+TEST_F(TestLargeInheritHierarchy, ClassABC) {
+    auto mockerA = MOCKER(&ClassA::func0);
+    auto mockerB = MOCKER(&ClassB::func0);
+    auto mockerC = MOCKER(&ClassC::func0);
     ClassA classA;
     ClassB classB;
     ClassC classC;
@@ -87,12 +93,12 @@ TEST(TestLargeInheritHierarchy, ClassABC) {
     EXPECT_EQ(9050, classC.ClassC::func0());
 }
 
-TEST(TestLargeInheritHierarchy, ClassE) {
-    CREATE_MOCKER(mockerA, &ClassA::func0);
-    CREATE_MOCKER(mockerB, &ClassB::func0);
-    CREATE_MOCKER(mockerC, &ClassC::func0);
-    CREATE_MOCKER(mockerD, &ClassD::func0);
-    CREATE_MOCKER(mockerE, &ClassE::func0);
+TEST_F(TestLargeInheritHierarchy, ClassE) {
+    auto mockerA = MOCKER(&ClassA::func0);
+    auto mockerB = MOCKER(&ClassB::func0);
+    auto mockerC = MOCKER(&ClassC::func0);
+    auto mockerD = MOCKER(&ClassD::func0);
+    auto mockerE = MOCKER(&ClassE::func0);
     ClassE classE;
     EXPECT_CALL(*mockerA, MOCK_FUNCTION(&classE))
         .Times(Exactly(1))

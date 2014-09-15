@@ -34,7 +34,9 @@ struct TestStaticMemberFunction : public ::testing::Test {
         stringValue(""),
         stringConstValue("HELLO") { }
     virtual void SetUp() { }
-    virtual void TearDown() { }
+    virtual void TearDown() {
+        CLEAR_MOCKER();
+    }
 
     static string func0Parameter() {
         return "Non mocked.";
@@ -70,7 +72,7 @@ struct TestStaticMemberFunction : public ::testing::Test {
 };
 
 TEST_F(TestStaticMemberFunction, RestoreToReal) {
-    CREATE_MOCKER(mocker, TestStaticMemberFunction::func0Parameter);
+    auto mocker = MOCKER(TestStaticMemberFunction::func0Parameter);
     EXPECT_CALL(*mocker, MOCK_FUNCTION())
         .Times(Exactly(1))
         .WillOnce(Return("Hello world."));
@@ -81,7 +83,7 @@ TEST_F(TestStaticMemberFunction, RestoreToReal) {
 
 TEST_F(TestStaticMemberFunction, MultiParameter) {
     auto call = bind(TestStaticMemberFunction::func5Parameter, false, '0', 0, "LOUIX", "");
-    CREATE_MOCKER(mocker, TestStaticMemberFunction::func5Parameter);
+    auto mocker = MOCKER(TestStaticMemberFunction::func5Parameter);
     EXPECT_CALL(*mocker, MOCK_FUNCTION(_, _, _, _, _))
         .Times(Exactly(1))
         .WillOnce(Return("Hello world."));
@@ -101,7 +103,7 @@ TEST_F(TestStaticMemberFunction, MultiReferenceParameter) {
             ref(intValue),
             ref(stringValue),
             ref(stringConstValue));
-    CREATE_MOCKER(mocker, TestStaticMemberFunction::func5ReferenceParameter);
+    auto mocker = MOCKER(TestStaticMemberFunction::func5ReferenceParameter);
     EXPECT_CALL(*mocker, MOCK_FUNCTION(_, _, _, _, _))
         .Times(Exactly(1))
         .WillOnce(Return(1));
@@ -124,7 +126,7 @@ TEST_F(TestStaticMemberFunction, MultiReferenceParameterWithArgsAction) {
             ref(intValue),
             ref(stringValue),
             ref(stringConstValue));
-    CREATE_MOCKER(mocker, TestStaticMemberFunction::func5ReferenceParameter);
+    auto mocker = MOCKER(TestStaticMemberFunction::func5ReferenceParameter);
     EXPECT_CALL(*mocker, MOCK_FUNCTION(Ref(boolValue), Ref(charValue), Ref(intValue), Ref(stringValue), _))
         .Times(AtLeast(1))
         .WillOnce(WithArgs<0, 1>(Invoke(TestStaticMemberFunction::testReferenceStubP1P2)));
@@ -142,19 +144,19 @@ TEST_F(TestStaticMemberFunction, MultiReferenceParameterWithArgsAction) {
 
 TEST_F(TestStaticMemberFunction, FunctionPointer) {
     auto function = TestStaticMemberFunction::func0Parameter;
-    CREATE_MOCKER(mocker1, TestStaticMemberFunction::func0Parameter);
+    auto mocker1 = MOCKER(TestStaticMemberFunction::func0Parameter);
     EXPECT_CALL(*mocker1, MOCK_FUNCTION())
         .Times(Exactly(1))
         .WillOnce(Return("Func1"));
     EXPECT_EQ("Func1", TestStaticMemberFunction::func0Parameter());
     function = TestStaticMemberFunction::func0Parameter2;
-    CREATE_MOCKER(mocker2, function);
+    auto mocker2 = MOCKER(function);
     EXPECT_CALL(*mocker2, MOCK_FUNCTION())
         .Times(Exactly(1))
         .WillOnce(Return("Func2"));
     EXPECT_EQ("Func2", TestStaticMemberFunction::func0Parameter2());
     function = TestStaticMemberFunction::func0Parameter3;
-    CREATE_MOCKER(mocker3, function);
+    auto mocker3 = MOCKER(function);
     EXPECT_CALL(*mocker3, MOCK_FUNCTION())
         .Times(Exactly(1))
         .WillOnce(Return("Func3"));

@@ -20,11 +20,17 @@ using namespace ::std;
 using namespace ::testing;
 using namespace ::CppFreeMock;
 
-TEST(RuntimePatcher, GraftFunctionFailed) {
-    CREATE_MOCKER(abortMocker, std::abort);
+struct TestRuntimePatcher : public ::testing::Test {
+    virtual void TearDown() {
+        CLEAR_MOCKER();
+    }
+};
+
+TEST_F(TestRuntimePatcher, GraftFunctionFailed) {
+    auto abortMocker = MOCKER(std::abort);
     EXPECT_CALL(*abortMocker, MOCK_FUNCTION())
         .Times(Exactly(1));
-    CREATE_MOCKER(unprotectMemoryForOnePageMocker, RuntimePatcherImpl::UnprotectMemoryForOnePage);
+    auto unprotectMemoryForOnePageMocker = MOCKER(RuntimePatcherImpl::UnprotectMemoryForOnePage);
     EXPECT_CALL(*unprotectMemoryForOnePageMocker, MOCK_FUNCTION(_))
         .Times(Exactly(1))
         .WillOnce(Return(6));
@@ -34,11 +40,11 @@ TEST(RuntimePatcher, GraftFunctionFailed) {
     RuntimePatcher::GraftFunction(data, data2, binary_backup);
 }
 
-TEST(RuntimePatcher, GraftFunctionSuccess) {
-    CREATE_MOCKER(abortMocker, std::abort);
+TEST_F(TestRuntimePatcher, GraftFunctionSuccess) {
+    auto abortMocker = MOCKER(std::abort);
     EXPECT_CALL(*abortMocker, MOCK_FUNCTION())
         .Times(Exactly(0));
-    CREATE_MOCKER(setJumpMocker, RuntimePatcherImpl::SetJump);
+    auto setJumpMocker = MOCKER(RuntimePatcherImpl::SetJump);
     EXPECT_CALL(*setJumpMocker, MOCK_FUNCTION(_, _, _))
         .Times(Exactly(1))
         .WillOnce(Return(0));
@@ -46,10 +52,4 @@ TEST(RuntimePatcher, GraftFunctionSuccess) {
     char data[16];
     char data2[16];
     RuntimePatcher::GraftFunction(data, data2, binary_backup);
-}
-
-TEST(RuntimePatcher, RevertGraft) {
-    CREATE_MOCKER(revertJumpMocker, RuntimePatcherImpl::RevertJump);
-    EXPECT_CALL(*revertJumpMocker, MOCK_FUNCTION(_, _))
-        .Times(Exactly(1));
 }
