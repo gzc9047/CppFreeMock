@@ -10,7 +10,6 @@
 
 #include "impl.h"
 
-// The struct identity to make sure every mock have different type, we use decltype(mocker)::pMocker internal.
 #define MOCKER_INTERNAL(function, identity) \
     ::CppFreeMock::MockerCreator::GetMocker<::CppFreeMock::TypeForUniqMocker<identity>>(function, #function)
 

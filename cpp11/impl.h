@@ -192,7 +192,7 @@ private:
             return got->second;
         } else {
             SimpleSingleton<RestoreFunctions>::getInstance().push_back(std::bind(MockerCacheType::RestoreCachedMockFunctionToReal));
-            MockerCacheType::getInstance().insert(std::make_pair(address, CreateMocker<I>(function, functionName)));
+            MockerCacheType::getInstance().insert({{address, CreateMocker<I>(function, functionName)}});
             return DoGetMocker<I, M>(function, functionName);
         }
     }
