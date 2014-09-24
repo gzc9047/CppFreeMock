@@ -3,9 +3,7 @@
 
 // CppFreeMock: a tool for mock global function, member function, class static function.
 //
-// Test other library's function, make sure that we can only see the declare not definition here.
-// This test base on some standard library, so if gmock or gtest call them, this test may fail.
-// But I choose them to show that what this tool can do.
+// Test this pointer check in large class inherit hierarchy.
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
