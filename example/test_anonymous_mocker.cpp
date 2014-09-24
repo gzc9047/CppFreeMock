@@ -3,12 +3,7 @@
 
 // CppFreeMock: a tool for mock global function, member function, class static function.
 //
-// Test global function:
-//  1, multi parameter;
-//  2, reference parameter;
-//  3, different namespace & same function name;
-//  4, function pointer;
-//  5, rollback to no mock;
+// Test create anonymous mocker.
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
