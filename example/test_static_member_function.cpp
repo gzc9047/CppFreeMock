@@ -110,7 +110,7 @@ TEST_F(TestStaticMemberFunction, MultiReferenceParameter) {
     EXPECT_EQ(1, call());
     boolValue = true;
     intValue = 1;
-    EXPECT_CALL(*mocker, MOCK_FUNCTION(true, _, 1, _, _))
+    EXPECT_CALL(*mocker, MOCK_FUNCTION(boolValue, _, intValue, _, _))
         .Times(Exactly(2))
         .WillRepeatedly(Return(2));
     EXPECT_EQ(2, TestStaticMemberFunction::func5ReferenceParameter(boolValue, charValue, intValue, stringValue, ""));

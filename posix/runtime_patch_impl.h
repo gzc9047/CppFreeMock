@@ -27,7 +27,9 @@ namespace RuntimePatcherImpl {
         int ret = mprotect(page, length, PROT_READ | PROT_WRITE | PROT_EXEC);
         if (ret != 0) {
             int err = errno;
-            std::cerr << "Unprotect memory meet errno: " << err << " description: " << strerror(err) << std::endl;
+            std::cerr << "Unprotect memory: " << address
+                << " meet errno: " << err
+                << " description: " << strerror(err) << std::endl;
         }
         return ret;
     }

@@ -12,6 +12,7 @@
 
 #include "runtime_patch.h"
 
+#include <iostream>
 #include <list>
 #include <memory>
 #include <unordered_map>
@@ -72,12 +73,10 @@ struct MockerBase<R(P ...)> {
         return gmocker.Invoke(p ...);
     }
 
-    // Here M means the Matcher type, not the real parameters.
-    // For example ::testing::_ can match any value but is not a real parameter type.
-    template < typename ... M >
-    ::testing::MockSpec<R(P...)>& gmock_CppFreeMockStubFunction(M... m) {
+    ::testing::MockSpec<R(P...)>& gmock_CppFreeMockStubFunction(const ::testing::Matcher<P>&... p) {
+        std::cout << "Function type: " << __PRETTY_FUNCTION__ << std::endl;
         gmocker.RegisterOwner(this);
-        return gmocker.With(m ...);
+        return gmocker.With(p ...);
     }
 
     virtual void RestoreToReal() = 0;
