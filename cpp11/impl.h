@@ -12,7 +12,6 @@
 
 #include "runtime_patch.h"
 
-#include <iostream>
 #include <list>
 #include <memory>
 #include <unordered_map>
@@ -74,7 +73,6 @@ struct MockerBase<R(P ...)> {
     }
 
     ::testing::MockSpec<R(P...)>& gmock_CppFreeMockStubFunction(const ::testing::Matcher<P>&... p) {
-        std::cout << "Function type: " << __PRETTY_FUNCTION__ << std::endl;
         gmocker.RegisterOwner(this);
         return gmocker.With(p ...);
     }
