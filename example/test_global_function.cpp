@@ -117,7 +117,7 @@ TEST_F(TestGlobalFunction, MultiReferenceParameter) {
     EXPECT_EQ(1, call());
     boolValue = true;
     intValue = 1;
-    EXPECT_CALL(*mocker, MOCK_FUNCTION(boolValue, _, intValue, _, _))
+    EXPECT_CALL(*mocker, MOCK_FUNCTION(Ref(boolValue), _, Ref(intValue), _, _))
         .Times(Exactly(2))
         .WillRepeatedly(Return(2));
     EXPECT_EQ(2, func5ReferenceParameter(boolValue, charValue, intValue, stringValue, ""));
