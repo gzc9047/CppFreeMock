@@ -31,6 +31,8 @@ namespace RuntimePatcherImpl {
 #include "posix/runtime_patch_impl.h"
 #elif __linux__
 #include "posix/runtime_patch_impl.h"
+#elif WIN32
+#include "win32/runtime_patch_impl.h"
 #endif
 
 namespace CppFreeMock {

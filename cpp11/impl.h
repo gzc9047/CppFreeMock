@@ -72,7 +72,7 @@ struct MockerBase<R(P ...)> {
         return gmocker.Invoke(p ...);
     }
 
-    ::testing::MockSpec<R(P...)>& gmock_CppFreeMockStubFunction(const ::testing::Matcher<P>&... p) {
+    ::testing::MockSpec<R(P...)> gmock_CppFreeMockStubFunction(const ::testing::Matcher<P>&... p) {
         gmocker.RegisterOwner(this);
         return gmocker.With(p ...);
     }
