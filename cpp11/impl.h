@@ -74,8 +74,9 @@ struct MockerBase<R(P ...)> {
 
     ::testing::MockSpec<R(P...)>& gmock_CppFreeMockStubFunction(const ::testing::Matcher<P>&... p) {
         gmocker.RegisterOwner(this);
-        return gmocker.With(p ...);
-    }
+        static auto r = gmocker.With(p ...);
+        return r;
+     }
 
     virtual void RestoreToReal() = 0;
 
